@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+        
+        <h3>Star Madness</h3>
+        <h4>Collect the Stars, use WASD or the arrow keys to move</h4>
+        
+        <script type="text/javascript">
+
+            var config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 300 },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+            var game = new Phaser.Game(config);
+
+            var platform;
+            var player;
+            var keyCon;
+            var score = 0;
+            var scoreText;
+
+            function preload ()
+            {
+                this.load.image('background', 'assets/stars.jpg');
+                this.load.image('kanye', 'assets/kanye.png');
+                this.load.image('plat', 'assets/platform.png');
+                this.load.image('star', 'assets/star.png');
+                this.load.spritesheet('ghost',
+                'assets/ghosts.png',
+                { frameWidth: 48, frameHeight: 48 }
+                );
+            }
+
+            function create ()
+            {
+                //background
+                this.add.image(400, 300, 'background');
+
+                platforms = this.physics.add.staticGroup(); // makes the platform stay in the same place
+
+                // platforms
+                platforms.create(200, 575, 'plat');
+                platforms.create(50, 510, 'plat');
+                platforms.create(600, 575, 'plat');
+                platforms.create(900, 100, 'plat');
+                platforms.create(300, 450, 'plat');
+                platforms.create(450, 450, 'plat');
+
+                platforms.create(510, 270, 'plat');
+                platforms.create(450, 270, 'plat');
+                this.add.image(100, 510, 'kanye').setScale(0.3);
+
+                // player
+                player = this.physics.add.sprite(400, 475, 'ghost');
+                this.physics.add.collider(player, platforms); // make it so the player collides with the platforms
+
+                player.setBounce(0.2);
+                player.setCollideWorldBounds(true);
+
+                this.anims.create({
+                    key: 'left',
+                    frames: this.anims.generateFrameNumbers('ghost', { start: 4, end: 6 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'turn',
+                    frames: [ { key: 'ghost', frame: 4 } ],
+                    frameRate: 20
+                });
+
+                this.anims.create({
+                    key: 'right',
+                    frames: this.anims.generateFrameNumbers('ghost', { start: 5, end: 8 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                // controls
+                keyCon = this.input.keyboard.createCursorKeys();
+                keys = this.input.keyboard.addKeys("W,A,S,D");
+
+
+                //stars
+                this.physics.add.collider(player, enemies);
+
+                stars = this.physics.add.group({
+                    key: 'star',
+                    repeat: 31,
+                    setXY: { x: 170, y: 140, stepX: 20 }
+                });
+
+                stars.children.iterate(function (child) {
+                    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                });
+
+                this.physics.add.collider(player, platforms);
+                this.physics.add.collider(stars, platforms);
+                this.physics.add.overlap(player, stars, collectStar, null, this);
+
+                stars2 = this.physics.add.group({
+                    key: 'star',
+                    repeat: 9,
+                    setXY: { x: 50, y: 300, stepX: 70 }
+                });
+
+                stars2.children.iterate(function (child) {
+                    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                });
+
+                this.physics.add.collider(player, platforms);
+                this.physics.add.collider(stars2, platforms);
+                this.physics.add.overlap(player, stars2, collectStar, null, this);
+                
+                stars3 = this.physics.add.group({
+                    key: 'star',
+                    repeat: 6,
+                    setXY: { x: 630, y: 20, stepX: 30 }
+                });
+                
+                stars3.children.iterate(function (child) {
+                    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                });
+
+                this.physics.add.collider(player, platforms);
+                this.physics.add.collider(stars3, platforms);
+                this.physics.add.overlap(player, stars3, collectStar, null, this);
+                
+                stars4 = this.physics.add.group({
+                    key: 'star',
+                    repeat: 10,
+                    setXY: { x: 480, y: 455, stepX: 30 }
+                });
+                
+                stars4.children.iterate(function (child) {
+                    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                });
+
+                this.physics.add.collider(player, platforms);
+                this.physics.add.collider(stars4, platforms);
+                this.physics.add.overlap(player, stars4, collectStar, null, this);
+
+                scoreText = this.add.text(16, 16, 'Stars: 0', { fontSize: '32px', fill: '#FFFFFF' });
+
+            }
+
+            function update (){
+                // conrtols
+                if(keyCon.left.isDown){
+                    player.setVelocityX(-120);
+                    player.anims.play('left', true);
+                } else if(keyCon.right.isDown){
+                    player.setVelocityX(120);
+                    player.anims.play('right', true);
+                } else {
+                    player.setVelocityX(0);
+                    player.anims.play('turn');
+                }
+                if(keyCon.up.isDown && player.body.touching.down){
+                    player.setVelocityY(-350);
+                }
+                
+                // player.setVelocity(0);
+
+                if (keys.A.isDown) {
+                    player.setVelocityX(-120);
+                    player.anims.play('left', true);
+                } else if (keys.D.isDown) {
+                    player.setVelocityX(120);
+                    player.anims.play('right', true);
+                }
+
+                if (keys.W.isDown && player.body.touching.down) {
+                    player.setVelocityY(-350);
+                } else if (keys.S.isDown) {
+                    player.setVelocityX(0);
+                    player.anims.play('turn');
+                }
+            }
+
+            function collectStar (player, star){
+                star.disableBody(true, true);
+                score += 1;
+                scoreText.setText('Score: ' + score);
+            }
+            
+        </script>
+
+</body>
+</html>

@@ -11,8 +11,8 @@
 </head>
 <body>
         
-        <h3>Star Madness</h3>
-        <h4>Collect the Stars, use WASD or the arrow keys</h4>
+        <h3>Star Quest</h3>
+        <h4>Collect the Stars, use WASD or the arrow keys. You have 3 lives, you lose a life everytime you jump.</h4>
         
         <script type="text/javascript">
 
@@ -42,6 +42,8 @@
             var enemies;
             var score = 0;
             var scoreText;
+            var life = 3;
+            var lifeText;
 
             function preload ()
             {
@@ -53,6 +55,7 @@
                 'assets/ghosts.png',
                 { frameWidth: 48, frameHeight: 48 }
                 );
+                
             }
 
             function create ()
@@ -166,7 +169,10 @@
                 this.physics.add.overlap(player, stars4, collectStar, null, this);
 
                 scoreText = this.add.text(16, 16, 'Stars: 0', { fontSize: '32px', fill: '#FFFFFF' });
-
+                
+                lifeText = this.add.text(640,12, 'Lives: ' + life, { fontSize: '32px', fill: '#00FF00'});
+                
+                
             }
 
             function update (){
@@ -183,10 +189,16 @@
                 }
                 if(keyCon.up.isDown && player.body.touching.down){
                     player.setVelocityY(-350);
+                    life --;
+                    lifeText.setText('Lives: ' + life);
+                    if(life == 1){
+                        lifeText.setColor('#FF0000');
+                    } else if(life < 0){
+                        noLoop();
+                        // this.add.text(400,300, 'Game Over', { fontSize: '70px', fill: '#FFFFFF'});
+                    }
                 }
                 
-                // player.setVelocity(0);
-
                 if (keys.A.isDown) {
                     player.setVelocityX(-120);
                     player.anims.play('left', true);
@@ -197,6 +209,14 @@
 
                 if (keys.W.isDown && player.body.touching.down) {
                     player.setVelocityY(-350);
+                    life --;
+                    lifeText.setText('Lives: ' + life);
+                    if(life == 1){
+                        lifeText.setColor('#FF0000');
+                    } else if(life < 0){
+                        noLoop();
+                        // this.add.text(400,300, 'Game Over', { fontSize: '70px', fill: '#FFFFFF'});
+                    }
                 } else if (keys.S.isDown) {
                     player.setVelocityX(0);
                     player.anims.play('turn');
@@ -205,9 +225,14 @@
 
             function collectStar (player, star){
                 star.disableBody(true, true);
-                score += 1;
+                score ++;
                 scoreText.setText('Stars: ' + score);
+                if(score == 60){
+                    scoreText.setColor('#00FF00');
+                    this.add.text(230,300, 'Game Over', { fontSize: '70px', fill: '#FFFFFF'});
+                }
             }
+            
             
         </script>
 
